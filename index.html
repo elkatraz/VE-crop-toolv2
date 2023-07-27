@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>VE Image Crop Tool</title>
+  <style>
+    /* Add your CSS styles here */
+    body {
+      display: flex;
+      margin: 0; /* Reset default margin */
+      position: relative; /* Set body as relative positioning to contain the text */
+    }
+
+    .original-image {
+      width: 50%;
+      margin: 10px;
+      position: relative;
+    }
+
+    .crop-box {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .crop-box.blue {
+      outline: 2px solid rgba(0, 0, 255, 0.7);
+      cursor: move;
+    }
+
+    .crop-box.purple {
+      outline: 2px solid rgba(128, 0, 128, 0.7);
+      cursor: move;
+    }
+
+    .crop-box.red {
+      outline: 2px solid rgba(255, 0, 0, 0.7);
+      cursor: move;
+    }
+
+    .crop-box.yellow {
+      outline: 2px solid rgba(255, 255, 0, 0.7);
+      cursor: move;
+    }
+
+    .crop-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      cursor: move;
+      background-color: transparent;
+      pointer-events: auto;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 10px;
+      padding: 5px;
+      font-weight: bold;
+      border-radius: 5px;
+    }
+
+    /* Custom styles for footers */
+    #footer169 {
+      color: white;
+      background-color: blue;
+    }
+
+    #footer54 {
+      color: white;
+      background-color: purple;
+    }
+
+    #footer34 {
+      color: black;
+      background-color: yellow;
+    }
+
+    #footer45 {
+      color: white;
+      background-color: red;
+    }
+
+    /* Custom styles for the text on the lower left */
+    .text-container {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      padding: 10px;
+      font-size: 16px;
+      line-height: 1.5;
+      color: #333; /* Text color */
+      background-color: #f1f1f1; /* Text background color */
+      border-radius: 5px;
+      margin-top: 60px; /* Add margin to the top to avoid overlapping with the header */
+    }
+
+    .text-line {
+      display: flex;
+      align-items: center;
+    }
+
+    .copy-button {
+      margin-left: 10px;
+      padding: 5px 10px;
+      background-color: #ccc;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Text container on the lower left -->
+  <div class="text-container">
+    <div class="text-line">
+      <span>16:9</span>
+      <button class="copy-button" onclick="copyToClipboard('16:9')">Copy</button>
+    </div>
+    <div class="text-line">
+      <span>16:9,5:4</span>
+      <button class="copy-button" onclick="copyToClipboard('16:9,5:4')">Copy</button>
+    </div>
+    <div class="text-line">
+      <span>16:9,5:4,3:4,4:5</span>
+      <button class="copy-button" onclick="copyToClipboard('16:9,5:4,3:4,4:5')">Copy</button>
+    </div>
+  </div>
+
+  <!-- Rest of the code remains unchanged -->
+</body>
+<script>
+  function copyToClipboard(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+  }
+</script>
+</head>
+<body>
+  <h1>VE Image Crop Tool</h1>
+  <form>
+    <label for="imageUrl">Image URL:</label>
+    <input type="text" id="imageUrl" required>
+    <button type="button" onclick="showCropBoxes()">Show Crop Boxes</button>
+  </form>
+
+  <!-- Original Image with Crop Boxes -->
+  <div class="original-image">
+    <img src="" alt="Original Image" class="original-image-element">
+    <div class="crop-box-container">
+      <div class="crop-box blue" id="cropBox169"></div>
+      <div class="crop-box purple" id="cropBox54"></div>
+    </div>
+    <div class="footer" id="footer169">16:9</div>
+    <div class="footer" id="footer54">5:4</div>
+  </div>
+
+  <!-- Second Original Image with Crop Boxes -->
+  <div class="original-image">
+    <img src="" alt="Original Image" class="original-image-element">
+    <div class="crop-box-container">
+      <div class="crop-box red" id="cropBox34"></div>
+      <div class="crop-box yellow" id="cropBox45"></div>
+    </div>
+    <div class="footer" id="footer34">3:4</div>
+    <div class="footer" id="footer45">4:5</div>
+  </div>
+
+  <script>
+    function showCropBoxes() {
+      const imageUrl = document.getElementById("imageUrl").value;
+      const originalImageElements = document.querySelectorAll(".original-image-element");
+      const cropBoxes = {
+        'cropBox169': { width: 16, height: 9, color: 'blue' },
+        'cropBox54': { width: 5, height: 4, color: 'purple' },
+        'cropBox34': { width: 3, height: 4, color: 'red' },
+        'cropBox45': { width: 4, height: 5, color: 'yellow' },
+      };
+
+      originalImageElements.forEach((originalImageElement, index) => {
+        originalImageElement.src = imageUrl;
+
+        originalImageElement.onload = () => {
+          // Fit the original image to the container without overlapping
+          const containerWidth = originalImageElement.parentElement.offsetWidth;
+          const containerHeight = originalImageElement.parentElement.offsetHeight;
+          const aspectRatio = originalImageElement.width / originalImageElement.height;
+
+          if (aspectRatio > containerWidth / containerHeight) {
+            originalImageElement.style.width = "100%";
+            originalImageElement.style.height = "auto";
+          } else {
+            originalImageElement.style.height = "100%";
+            originalImageElement.style.width = "auto";
+          }
+
+          // Remove existing crop boxes
+          const existingCropBoxes = originalImageElement.parentElement.querySelectorAll(".crop-box");
+          existingCropBoxes.forEach((cropBox) => {
+            cropBox.remove();
+          });
+
+          // Add crop boxes to the original image
+          const cropBoxIds = Object.keys(cropBoxes).filter((boxId) => {
+            if (index === 0) return boxId === 'cropBox169' || boxId === 'cropBox54';
+            else return boxId === 'cropBox34' || boxId === 'cropBox45';
+          });
+
+          // Track the number of crop boxes of each kind
+          const cropBoxCount = {};
+
+          cropBoxIds.forEach((boxId) => {
+            // Check if there are already two crop boxes of the same kind
+            if (cropBoxCount[cropBoxes[boxId].color] >= 2) return;
+
+            const cropBox = document.createElement("div");
+            cropBox.classList.add("crop-box", cropBoxes[boxId].color, boxId);
+            originalImageElement.parentElement.querySelector('.crop-box-container').appendChild(cropBox);
+
+            const { width, height } = cropBoxes[boxId];
+            const aspectRatioWidth = originalImageElement.width / width;
+            const aspectRatioHeight = originalImageElement.height / height;
+            const cropBoxSize = Math.min(aspectRatioWidth, aspectRatioHeight);
+
+            const cropBoxWidth = cropBoxSize * width;
+            const cropBoxHeight = cropBoxSize * height;
+            const cropBoxLeft = (originalImageElement.width - cropBoxWidth) / 2;
+            const cropBoxTop = (originalImageElement.height - cropBoxHeight) / 2;
+
+            cropBox.style.width = `${cropBoxWidth}px`;
+            cropBox.style.height = `${cropBoxHeight}px`;
+            cropBox.style.left = `${cropBoxLeft}px`;
+            cropBox.style.top = `${cropBoxTop}px`;
+
+            // Add the overlay for dragging
+            const overlay = document.createElement('div');
+            overlay.classList.add('crop-overlay');
+            cropBox.appendChild(overlay);
+
+            enableCropBoxDragging(cropBox);
+
+            // Increment the crop box count for the current color
+            if (!cropBoxCount[cropBoxes[boxId].color]) cropBoxCount[cropBoxes[boxId].color] = 1;
+            else cropBoxCount[cropBoxes[boxId].color]++;
+          });
+        };
+      });
+    }
+
+    function enableCropBoxDragging(cropBox) {
+      let activeCropBox = null;
+      let startX, startY, startLeft, startTop;
+
+      const overlay = cropBox.querySelector('.crop-overlay');
+
+      overlay.addEventListener("mousedown", (e) => {
+        e.stopPropagation();
+        activeCropBox = cropBox;
+        startX = e.clientX;
+        startY = e.clientY;
+        startLeft = parseInt(
+          document.defaultView.getComputedStyle(activeCropBox).left,
+          10
+        );
+        startTop = parseInt(
+          document.defaultView.getComputedStyle(activeCropBox).top,
+          10
+        );
+      });
+
+      document.addEventListener("mousemove", (e) => {
+        if (!activeCropBox) return;
+        e.preventDefault();
+
+        const imageElement = activeCropBox.closest('.original-image').querySelector('.original-image-element');
+        const containerRect = imageElement.getBoundingClientRect();
+        const moveX = e.clientX - startX;
+        const moveY = e.clientY - startY;
+
+        let newLeft = startLeft + moveX;
+        let newTop = startTop + moveY;
+
+        // Ensure the crop box doesn't go out of the container
+        newLeft = Math.min(
+          Math.max(newLeft, 0),
+          imageElement.width - parseInt(
+            document.defaultView.getComputedStyle(activeCropBox).width,
+            10
+          )
+        );
+        newTop = Math.min(
+          Math.max(newTop, 0),
+          imageElement.height - parseInt(
+            document.defaultView.getComputedStyle(activeCropBox).height,
+            10
+          )
+        );
+
+        activeCropBox.style.left = `${newLeft}px`;
+        activeCropBox.style.top = `${newTop}px`;
+      });
+
+      document.addEventListener("mouseup", () => {
+        activeCropBox = null;
+      });
+    }
+  </script>
+</body>
+</html>
